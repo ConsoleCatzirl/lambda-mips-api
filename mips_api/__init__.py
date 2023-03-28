@@ -233,12 +233,8 @@ def lambda_handler(event, context):
                 return _build_return(200, mips_chart)
 
             elif event_path == api_routes['ApiValidTags']:
-                try:
-                    valid_tags = list_tags(params, mips_chart, omit_codes_list, extra_codes_dict)
-                except Exception as exc:
-                    return _build_return(500, {"error": str(exc)})
-
                 # return valid tags
+                valid_tags = list_tags(params, mips_chart, omit_codes_list, extra_codes_dict)
                 return _build_return(200, valid_tags)
 
             else:
@@ -247,4 +243,5 @@ def lambda_handler(event, context):
         return _build_return(400, {"error": f"Invalid event: No path found: {event}"})
 
     except Exception as exc:
+        LOG.exception(exc)
         return _build_return(500, {"error": str(exc)})
