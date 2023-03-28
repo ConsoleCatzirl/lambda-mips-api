@@ -125,6 +125,10 @@ Resources:
           AcmCertificateArn: !If [ HasAcmCertificateArn, !Ref AcmCertificateArn, !Ref "AWS::NoValue" ]
           MinimumProtocolVersion: !If [ HasAcmCertificateArn, "TLSv1.2_2021", !Ref "AWS::NoValue" ]
           SslSupportMethod: !If [ HasAcmCertificateArn, "sni-only", !Ref "AWS::NoValue" ]
+        CustomErrorResponses:
+          # If we get locked out (for an hour) cache the response for an hour
+          - ErrorCode: 502
+            ErrocCachingMinTTL: 3600
 
   CloudFrontCachePolicy:
     Type: AWS::CloudFront::CachePolicy

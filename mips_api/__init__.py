@@ -19,6 +19,11 @@ _mips_url_logout = 'https://mipapi.abilaonline.com/api/security/logout'
 ssm_client = None
 
 
+# Create a custom exception class to distinguish upstream login failures
+# from other types of exceptions
+class UpstreamFailure(Exception):
+    pass
+
 def _get_os_var(varnam):
     try:
         return os.environ[varnam]
@@ -113,7 +118,7 @@ def collect_chart(org_name, secrets):
 
     except Exception as exc:
         LOG.error('Error interacting with mips')
-        raise exc
+        raise UpstreamFailure('Error interacting with mips') from exc
 
     finally:
         # It's important to logout. Logging in a second time without logging out will lock us out of MIPS
@@ -241,6 +246,10 @@ def lambda_handler(event, context):
                 return _build_return(404, {"error": "Invalid request path"})
 
         return _build_return(400, {"error": f"Invalid event: No path found: {event}"})
+
+    except UpstreamFailure as exc:
+        LOG.exception(exc)
+        return _build_return(502, {"error": str(exc)})
 
     except Exception as exc:
         LOG.exception(exc)
